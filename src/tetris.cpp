@@ -31,13 +31,19 @@ float delta_time;
 
 // TODO:
 
-// JUST MAKE 200 TETROMINOES INSTEAD
-// YOU CAN KEEP THE GAMEOBJECT STRUCT, BUT SINCE THE IMPLEMENTATION LOGIC SHOULD BE 
-// DIFFERENT, TREAT THE BLOCKS AND GAME OBJECTS AS SEPARATE THINGS. DO NOT TRY TO PUT ONE INSIDE THE OTHER
-// FIX THAT WHEN YOU RETURN.
-GameObject blocks[200];
+// Make a Board State
+// 2d Matrix
+// Collision
+
+
+Tetromino blocks[200];
+GameObject objects[200];
 int numBlocks = 1;
 int curBlock = 0;
+
+// Track Collision
+// It's all just math from here on out...
+int board[BOARDHEIGHT][BOARDWIDTH] = {0};
 
 
 /* Runs once at startup */
@@ -55,7 +61,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    surface = IMG_Load("./assets/L_block.png");
+    surface = IMG_Load("./assets/L_Tetromino.png");
     if (!surface) {
         SDL_Log("Couldn't load image: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -76,7 +82,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     // Load Square Block
-    surface = IMG_Load("./assets/Square_block.png");
+    surface = IMG_Load("./assets/Square_Tetromino.png");
 
     S_width = surface->w;
     S_height = surface->h;
@@ -106,8 +112,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     grid_position.h = GRID_POS_H;
 
 
-    SpawnTetromino(L_Block, blocks, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
-    numBlocks = curBlock;
+    SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
 
     return SDL_APP_CONTINUE;
 }
@@ -127,20 +132,18 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         if (key.repeat == 0) {
             if(keyboard_state[SDL_SCANCODE_UP] || keyboard_state[SDL_SCANCODE_Z]) {
                 blocks[curBlock].rotateClockwise();
-                if (blocks[curBlock].rotation >= 360) blocks[curBlock].rotation -= 360;  // Normalize
             } else if(keyboard_state[SDL_SCANCODE_X]) {
-                blocks[curBlock].rotation -= 90;
-                if (blocks[curBlock].rotation <= 0) blocks[curBlock].rotation += 360;
+                blocks[curBlock].rotateCounterClockwise();
             }
         }
         if(keyboard_state[SDL_SCANCODE_LEFT]) {
-                blocks[curBlock].position.x -= 32;
+                blocks[curBlock].x -= 32;
             } else if(keyboard_state[SDL_SCANCODE_RIGHT]) {
-                blocks[curBlock].position.x += 32;
+                blocks[curBlock].x += 32;
             } else if(keyboard_state[SDL_SCANCODE_DOWN]) {
-                blocks[curBlock].position.y += 32;
+                blocks[curBlock].y += 32;
             } else if(keyboard_state[SDL_SCANCODE_SPACE]) {
-                blocks[curBlock].position.y = 896;
+                blocks[curBlock].y = 608;
             }
         }
 
@@ -151,22 +154,23 @@ void update() {
     current_tick = SDL_GetTicks();
 
     if( current_tick - last_tick >= interval) {
-        blocks[curBlock].position.y += 32;
+        blocks[curBlock].y += 32;
         last_tick = current_tick;
         if(interval > 250) {
             interval -= 50;
         }
     }
 
-    if(blocks[curBlock].position.y >= WINDOW_HEIGHT - 96) {
-        blocks[curBlock].position.y = WINDOW_HEIGHT - 96;
+    if(blocks[curBlock].y >= WINDOW_HEIGHT - 176) {
+        blocks[curBlock].y = WINDOW_HEIGHT - 176;
+        blocks[curBlock].settleBlock();
 
         curBlock ++;
         numBlocks ++;
         if(numBlocks % 2 == 0) {
-            GameObject_Init(&blocks[curBlock], L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, L_width, L_height, true );
+            SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
         } else {
-            GameObject_Init(&blocks[curBlock], Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, S_width, S_height, true );
+            SpawnTetromino(Square_Block, curBlock, Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
         }
     }
 }
@@ -177,7 +181,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     update();
 
 
-
+    
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
@@ -187,7 +191,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     // Render Blocks
     for (int i = 0; i < numBlocks; i++) {
-        GameObject_Render(renderer, &blocks[i]);
+        drawTetromino(blocks[i], renderer, blocks[i].texture);
     }
 
 
@@ -201,5 +205,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     SDL_DestroyTexture(L_texture);
     SDL_DestroyTexture(Square_texture);
+    SDL_DestroyTexture(Grid_texture);
     // SDL will handle window and renderer cleanup
 }

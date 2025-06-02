@@ -10,19 +10,25 @@ using Grid4x4 = std::array<std::array<int, Tetromino_size>, Tetromino_size>;
 
 struct Tetromino {
     Grid4x4 shape;
-    int x, y;
+    int x, y; // Position in pixels
+    SDL_Texture *texture;
 
-    Tetromino(const Grid4x4& initialShape, int startX, int startY)
-        : shape(initialShape), x(startX), y(startY) {}
+    Tetromino() : x(0), y(0) {
+        shape = {};
+        texture = NULL;
+    }
+
+    Tetromino(const Grid4x4& initialShape, int startX, int startY, SDL_Texture *texture)
+        : shape(initialShape), x(startX), y(startY), texture(texture) {}
 
     void rotateClockwise() {
         Grid4x4 rotated{};
         for (int i = 0; i < Tetromino_size; ++i) {
             for (int j = 0; j < Tetromino_size; ++j) {
                 rotated[j][Tetromino_size - 1 - i] = shape[i][j];
-            shape = rotated;
             }
         }
+        shape = rotated;
     }
 
     void rotateCounterClockwise() {
@@ -30,14 +36,28 @@ struct Tetromino {
         for (int i = 0; i < Tetromino_size; ++i) {
             for (int j = 0; j < Tetromino_size; ++j) {
                 rotated[Tetromino_size - 1 - j][i] = shape[i][j];
-            shape = rotated;
             }
         }
-    }      
+        shape = rotated;
+    }
 
-
+    void settleBlock() {
+        for (int i = Tetromino_size - 1; i >= 0; --i) {
+            for (int j = 0; j < Tetromino_size; ++j) {
+                if(shape[i][j] == 1 && shape[3][j] == 0) {
+                    shape[3][j] = 1;
+                    shape[i][j] = 0;
+                } else if(shape[i][j] == 1 && shape[2][j] == 0) {
+                    shape[2][j] = 1;
+                    shape[i][j] = 0;
+                } else if(shape[i][j] == 1 && shape[1][j] == 0) {
+                    shape[1][j] = 1;
+                    shape[i][j] = 0;
+                }
+            }
+        }
+    }
 };
-
 
 typedef struct {
     SDL_Texture* texture;
@@ -66,4 +86,4 @@ void GameObject_Render(SDL_Renderer* renderer, const GameObject* obj);
 
 void drawTetromino(const Tetromino& tetromino, SDL_Renderer* renderer, SDL_Texture* blockTexture);
 
-void SpawnTetromino(Grid4x4 blockType, GameObject* destArray, int& destIndex, SDL_Texture* texture, int startX, int startY, int blockW, int blockH);
+void SpawnTetromino(Grid4x4 blockType, int& destIndex, SDL_Texture* texture, int startX, int startY, int blockW, int blockH);
