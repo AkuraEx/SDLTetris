@@ -5,6 +5,7 @@
 #include <string>
 #include "entity.h"
 #include "definitions.h"
+#include <cstdlib>
 
 using namespace std;
 
@@ -20,7 +21,6 @@ static int L_width = 0;
 static int L_height = 0;
 
 
-double rotate = 90;
 SDL_FRect grid_position;
 
 Uint64 last_tick = 0;
@@ -130,20 +130,20 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_KEY_DOWN) {
         SDL_KeyboardEvent key = event->key;
         if (key.repeat == 0) {
-            if(keyboard_state[SDL_SCANCODE_UP] || keyboard_state[SDL_SCANCODE_Z]) {
+            if(keyboard_state[SDL_SCANCODE_UP] || keyboard_state[SDL_SCANCODE_Z] ) {
                 blocks[curBlock].rotateClockwise();
-            } else if(keyboard_state[SDL_SCANCODE_X]) {
+            } else if(keyboard_state[SDL_SCANCODE_X] ){
                 blocks[curBlock].rotateCounterClockwise();
             }
         }
-        if(keyboard_state[SDL_SCANCODE_LEFT]) {
+        if(keyboard_state[SDL_SCANCODE_LEFT] && !blocks[curBlock].checkWall(-BLOCKSIZE)){
                 blocks[curBlock].x -= 32;
-            } else if(keyboard_state[SDL_SCANCODE_RIGHT]) {
+            } else if(keyboard_state[SDL_SCANCODE_RIGHT] && !blocks[curBlock].checkWall(BLOCKSIZE) ){
                 blocks[curBlock].x += 32;
-            } else if(keyboard_state[SDL_SCANCODE_DOWN]) {
+            } else if(keyboard_state[SDL_SCANCODE_DOWN]){
                 blocks[curBlock].y += 32;
-            } else if(keyboard_state[SDL_SCANCODE_SPACE]) {
-                blocks[curBlock].y = 608;
+            } else if(keyboard_state[SDL_SCANCODE_SPACE]){
+                blocks[curBlock].y = 640;
             }
         }
 
@@ -157,17 +157,17 @@ void update() {
         blocks[curBlock].y += 32;
         last_tick = current_tick;
         if(interval > 250) {
-            interval -= 50;
+            interval -= 5;
         }
     }
 
-    if(blocks[curBlock].y >= WINDOW_HEIGHT - 176) {
-        blocks[curBlock].y = WINDOW_HEIGHT - 176;
+    if(blocks[curBlock].y >= WINDOW_HEIGHT - 144) {
+        blocks[curBlock].y = WINDOW_HEIGHT - 144;
         blocks[curBlock].settleBlock();
 
         curBlock ++;
         numBlocks ++;
-        if(numBlocks % 2 == 0) {
+        if(current_tick % 2 == 0) {
             SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
         } else {
             SpawnTetromino(Square_Block, curBlock, Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
