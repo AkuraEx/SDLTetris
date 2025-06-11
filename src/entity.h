@@ -5,6 +5,7 @@
 #include "definitions.h"
 
 using Grid3x3 = std::array<std::array<int, TETROMINOGRID>, TETROMINOGRID>;
+extern int board[BOARDHEIGHT][BOARDWIDTH];
 
 struct Tetromino {
     Grid3x3 shape;
@@ -45,22 +46,89 @@ struct Tetromino {
         }
     }
 
+    
+    /*
     void settleBlock() {
         for (int i = TETROMINOGRID - 1; i >= 0; --i) {
             for (int j = 0; j < TETROMINOGRID; ++j) {
-                if(shape[i][j] == 1 && shape[3][j] == 0) {
+                if(shape[i][j] == 1 && shape[3][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
                     shape[3][j] = 1;
                     shape[i][j] = 0;
-                } else if(shape[i][j] == 1 && shape[2][j] == 0) {
+                    board[x / 32 - 10][y / 32 - 1] = 1;
+                } else if(shape[i][j] == 1 && shape[2][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
                     shape[2][j] = 1;
                     shape[i][j] = 0;
-                } else if(shape[i][j] == 1 && shape[1][j] == 0) {
+                    board[x / 32 - 10][y / 32 - 1] = 1;
+                } else if(shape[i][j] == 1 && shape[1][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
                     shape[1][j] = 1;
                     shape[i][j] = 0;
+                    board[x / 32 - 10][y / 32 - 1] = 1;
                 }
             }
         }
     }
+        */
+
+    bool checkUnder() {
+        for (int i = 0; i < TETROMINOGRID; ++i) {
+            for (int j = 0; j < TETROMINOGRID; ++j) {
+                if (shape[i][j] == 0) continue;
+
+                int newY = y + BLOCKSIZE + (i * BLOCKSIZE);
+                int newX = x + (j * BLOCKSIZE);
+
+                int row = (newY - OFFSET_Y) / BLOCKSIZE;
+                int col = (newX - OFFSET_X) / BLOCKSIZE;
+
+                if (row > BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row][col] == 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void hardDrop() {
+    // Drop until we hit something or bottom
+    while (true) {
+        bool canDrop = true;
+        for (int i = 0; i < TETROMINOGRID; ++i) {
+            for (int j = 0; j < TETROMINOGRID; ++j) {
+                if (shape[i][j] == 0) continue;
+
+                int newY = y + (i * BLOCKSIZE);
+                int newX = x + (j * BLOCKSIZE);
+
+                int row = (newY - OFFSET_Y) / BLOCKSIZE;
+                int col = (newX - OFFSET_X) / BLOCKSIZE;
+
+                if (row >= BOARDHEIGHT || col < 0 || col >= BOARDWIDTH || board[row][col] == 1) {
+                    canDrop = false;
+                }
+            }
+        }
+
+        if (!canDrop) break;
+        y += BLOCKSIZE;
+    }
+
+    // Lock into board
+    for (int i = 0; i < TETROMINOGRID; ++i) {
+        for (int j = 0; j < TETROMINOGRID; ++j) {
+            if (shape[i][j] == 0) continue;
+
+            int row = (y + i * BLOCKSIZE - OFFSET_Y) / BLOCKSIZE - 1;
+            int col = (x + j * BLOCKSIZE - OFFSET_X) / BLOCKSIZE;
+
+
+            // Safety check to avoid crash
+            if (row >= 0 && row < BOARDHEIGHT && col >= 0 && col < BOARDWIDTH) {
+                board[row][col] = 1;
+            }
+        }
+    }
+}
+    ////////////////////////////////////////////////
 
     bool checkCollision(Grid3x3& newShape) {
         for(int i = 0; i < TETROMINOGRID; ++i) {
@@ -68,7 +136,9 @@ struct Tetromino {
                 if(newShape[i][j] != 0) {
                     int newX = x + j * BLOCKSIZE;
                     int newY = y + i * BLOCKSIZE;
-                    if (newX < 320 || newX > 672)
+                    int boardX = newX / 32 - 10;
+                    int boardY = newY / 32 - 1;
+                    if (newX < 320 || newX > 672 || board[boardX][boardY] != 0)
                         return true;
                     }
                 }
@@ -106,6 +176,18 @@ const Grid3x3 L_Block = {{
 
 const Grid3x3 Square_Block = {{
     {1, 1, 0},
+    {1, 1, 0},
+    {0, 0, 0}
+}};
+
+const Grid3x3 T_Block = {{
+    {1, 1, 1},
+    {0, 1, 0},
+    {0, 0, 0}
+}};
+
+const Grid3x3 R_Block = {{
+    {0, 1, 1},
     {1, 1, 0},
     {0, 0, 0}
 }};

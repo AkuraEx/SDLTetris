@@ -13,12 +13,18 @@ using namespace std;
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *L_texture = NULL;
+static SDL_Texture *T_texture = NULL;
 static SDL_Texture *Square_texture = NULL;
+static SDL_Texture *R_texture = NULL;
 static SDL_Texture *Grid_texture = NULL;
 static int S_width = 0;
 static int S_height = 0;
+static int T_width = 0;
+static int T_height = 0;
 static int L_width = 0;
 static int L_height = 0;
+static int R_width = 0;
+static int R_height = 0;
 
 
 SDL_FRect grid_position;
@@ -95,6 +101,35 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    // Load T Block
+    surface = IMG_Load("./assets/T_tetromino.png");
+    
+    T_width = surface->w;
+    T_height = surface->h;
+
+    T_texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_DestroySurface(surface);
+
+    if (!T_texture) {
+        SDL_Log("Couldn't create texture: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+    
+
+    // Load T Block
+    surface = IMG_Load("./assets/R_tetromino.png");
+    
+    R_width = surface->w;
+    R_height = surface->h;
+
+    R_texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_DestroySurface(surface);
+
+    if (!R_texture) {
+        SDL_Log("Couldn't create texture: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
     // Load Grid
     surface = IMG_Load("./assets/tetris_grid.png");
 
@@ -112,7 +147,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     grid_position.h = GRID_POS_H;
 
 
-    SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+    SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X - 16, GRID_POS_Y + 16, 32, 32);
 
     return SDL_APP_CONTINUE;
 }
@@ -143,7 +178,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             } else if(keyboard_state[SDL_SCANCODE_DOWN]){
                 blocks[curBlock].y += 32;
             } else if(keyboard_state[SDL_SCANCODE_SPACE]){
-                blocks[curBlock].y = 640;
+                blocks[curBlock].hardDrop();
             }
         }
 
@@ -153,24 +188,29 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 void update() {
     current_tick = SDL_GetTicks();
 
-    if( current_tick - last_tick >= interval) {
-        blocks[curBlock].y += 32;
+    if(current_tick - last_tick >= interval) {
+
+        if(!blocks[curBlock].checkUnder()) {
+            curBlock ++;
+            numBlocks ++;
+
+            if(current_tick % 4 == 0) {
+                SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16 , GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 4 == 1) {
+                SpawnTetromino(Square_Block, curBlock, Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 4 == 2) {
+                SpawnTetromino(T_Block, curBlock, T_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+            } else {
+                SpawnTetromino(R_Block, curBlock, R_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+            }
+
+
+        } else {
+            blocks[curBlock].y += 32;
+        }
         last_tick = current_tick;
         if(interval > 250) {
             interval -= 5;
-        }
-    }
-
-    if(blocks[curBlock].y >= WINDOW_HEIGHT - 144) {
-        blocks[curBlock].y = WINDOW_HEIGHT - 144;
-        blocks[curBlock].settleBlock();
-
-        curBlock ++;
-        numBlocks ++;
-        if(current_tick % 2 == 0) {
-            SpawnTetromino(L_Block, curBlock, L_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
-        } else {
-            SpawnTetromino(Square_Block, curBlock, Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
         }
     }
 }
@@ -192,6 +232,19 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     // Render Blocks
     for (int i = 0; i < numBlocks; i++) {
         drawTetromino(blocks[i], renderer, blocks[i].texture);
+    }
+
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 10; j++) {
+            if(board[i][j] == 1) {
+                SDL_FRect temp;
+                temp.x = j * 32 + 304;
+                temp.y = i * 32 + 80;
+                temp.h = 32;
+                temp.w = 32;
+                SDL_RenderTexture(renderer, Square_texture, NULL, &temp);
+            }
+        }
     }
 
 

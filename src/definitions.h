@@ -7,6 +7,8 @@
 #define GRID_POS_H 704
 #define GRID_POS_X 320
 #define GRID_POS_Y 32
+#define OFFSET_Y 48
+#define OFFSET_X 304
 #define BOARDWIDTH 10
 #define BOARDHEIGHT 20
 #define BLOCKSIZE 32
