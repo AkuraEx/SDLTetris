@@ -4,8 +4,15 @@
 #include <array>
 #include "definitions.h"
 
+typedef struct {
+    SDL_Texture *texture;
+    int fill;
+} Tile;
+
 using Grid3x3 = std::array<std::array<int, TETROMINOGRID>, TETROMINOGRID>;
-extern int board[BOARDHEIGHT][BOARDWIDTH];
+extern Tile board[BOARDHEIGHT][BOARDWIDTH];
+
+
 
 struct Tetromino {
     Grid3x3 shape;
@@ -46,28 +53,6 @@ struct Tetromino {
         }
     }
 
-    
-    /*
-    void settleBlock() {
-        for (int i = TETROMINOGRID - 1; i >= 0; --i) {
-            for (int j = 0; j < TETROMINOGRID; ++j) {
-                if(shape[i][j] == 1 && shape[3][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
-                    shape[3][j] = 1;
-                    shape[i][j] = 0;
-                    board[x / 32 - 10][y / 32 - 1] = 1;
-                } else if(shape[i][j] == 1 && shape[2][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
-                    shape[2][j] = 1;
-                    shape[i][j] = 0;
-                    board[x / 32 - 10][y / 32 - 1] = 1;
-                } else if(shape[i][j] == 1 && shape[1][j] == 0 && board[x / 32 - 10][(y + 32) / 32 - 1] != 1) {
-                    shape[1][j] = 1;
-                    shape[i][j] = 0;
-                    board[x / 32 - 10][y / 32 - 1] = 1;
-                }
-            }
-        }
-    }
-        */
 
     bool checkUnder() {
         for (int i = 0; i < TETROMINOGRID; ++i) {
@@ -80,7 +65,7 @@ struct Tetromino {
                 int row = (newY - OFFSET_Y) / BLOCKSIZE;
                 int col = (newX - OFFSET_X) / BLOCKSIZE;
 
-                if (row > BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row][col] == 1) {
+                if (row > BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row][col].fill == 1) {
                     return false;
                 }
             }
@@ -102,7 +87,7 @@ struct Tetromino {
                 int row = (newY - OFFSET_Y) / BLOCKSIZE;
                 int col = (newX - OFFSET_X) / BLOCKSIZE;
 
-                if (row >= BOARDHEIGHT || col < 0 || col >= BOARDWIDTH || board[row][col] == 1) {
+                if (row >= BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row][col].fill == 1) {
                     canDrop = false;
                 }
             }
@@ -110,9 +95,11 @@ struct Tetromino {
 
         if (!canDrop) break;
         y += BLOCKSIZE;
+        }
     }
 
     // Lock into board
+    void lock() {
     for (int i = 0; i < TETROMINOGRID; ++i) {
         for (int j = 0; j < TETROMINOGRID; ++j) {
             if (shape[i][j] == 0) continue;
@@ -123,11 +110,12 @@ struct Tetromino {
 
             // Safety check to avoid crash
             if (row >= 0 && row < BOARDHEIGHT && col >= 0 && col < BOARDWIDTH) {
-                board[row][col] = 1;
+                board[row][col].fill = 1;
+                board[row][col].texture = texture;
+                }
             }
         }
     }
-}
     ////////////////////////////////////////////////
 
     bool checkCollision(Grid3x3& newShape) {
@@ -138,7 +126,7 @@ struct Tetromino {
                     int newY = y + i * BLOCKSIZE;
                     int boardX = newX / 32 - 10;
                     int boardY = newY / 32 - 1;
-                    if (newX < 320 || newX > 672 || board[boardX][boardY] != 0)
+                    if (newX < 320 || newX > 640 || board[boardX][boardY].fill != 0)
                         return true;
                     }
                 }
@@ -152,7 +140,7 @@ struct Tetromino {
                 if(shape[i][j] != 0) {
                     int newX = distance + x + j * BLOCKSIZE;
                     int newY = distance + y + i * BLOCKSIZE;
-                    if (newX < 320 || newX > 672)
+                    if (newX < 320 || newX > 640)
                         return true;
                     }
                 }
@@ -161,44 +149,52 @@ struct Tetromino {
     }
 };
 
-typedef struct {
-    SDL_Texture* texture;
-    SDL_FRect position;
-    SDL_FPoint origin;
-    bool visible;
-} GameObject;
 
 const Grid3x3 L_Block = {{
-    {0, 1, 0},
-    {0, 1, 0},
-    {0, 1, 1}
+    {0, 1, 0, 0},
+    {0, 1, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 0, 0}
 }};
 
 const Grid3x3 Square_Block = {{
-    {1, 1, 0},
-    {1, 1, 0},
-    {0, 0, 0}
+    {0, 0, 0, 0},
+    {0, 1, 1, 0},
+    {0, 1, 1, 0},
+    {0, 0, 0, 0}
 }};
 
 const Grid3x3 T_Block = {{
-    {1, 1, 1},
-    {0, 1, 0},
-    {0, 0, 0}
+    {0, 0, 0, 0},
+    {1, 1, 1, 0},
+    {0, 1, 0, 0},
+    {0, 0, 0, 0}
 }};
 
 const Grid3x3 R_Block = {{
-    {0, 1, 1},
-    {1, 1, 0},
-    {0, 0, 0}
+    {0, 1, 1, 0},
+    {1, 1, 0, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
 }};
 
-void GameObject_Init(GameObject* obj, SDL_Texture* texture, float x, float y, float w, float h, bool visible);
+const Grid3x3 Long_Block = {{
+    {1, 0, 0, 0},
+    {1, 0, 0, 0},
+    {1, 0, 0, 0},
+    {1, 0, 0, 0}
+}};
 
-void GameObject_Render(SDL_Renderer* renderer, const GameObject* obj);
+const Grid3x3 Left_Block = {{
+    {1, 1, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+}};
 
 void drawTetromino(const Tetromino& tetromino, SDL_Renderer* renderer, SDL_Texture* blockTexture);
 
-void SpawnTetromino(Grid3x3 blockType, int& destIndex, SDL_Texture* texture, int startX, int startY, int blockW, int blockH);
+void SpawnTetromino(Grid3x3 blockType, SDL_Texture* texture, int startX, int startY, int blockW, int blockH);
 
 
 
