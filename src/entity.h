@@ -3,6 +3,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <array>
 #include "definitions.h"
+#include <iostream>
 
 typedef struct {
     SDL_Texture *texture;
@@ -37,6 +38,19 @@ struct Tetromino {
         }
         if(!checkCollision(rotated)) {
             shape = rotated;
+        } else {
+            // Check if collision on both right and left and adjust accordingly
+            while(checkCollision(rotated)) {
+                if(!checkWall(-BLOCKSIZE)) {
+                    x -= 32;
+                    shape = rotated;
+                } else if(!checkWall(BLOCKSIZE)) {
+                    x += 32;
+                    shape = rotated;
+                } else {
+                    return;
+                }
+            }
         }
     }
 
@@ -65,7 +79,7 @@ struct Tetromino {
                 int row = (newY - OFFSET_Y) / BLOCKSIZE;
                 int col = (newX - OFFSET_X) / BLOCKSIZE;
 
-                if (row > BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row][col].fill == 1) {
+                if (row >= BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row - 1][col].fill == 1) {
                     return false;
                 }
             }
@@ -126,7 +140,7 @@ struct Tetromino {
                     int newY = y + i * BLOCKSIZE;
                     int boardX = newX / 32 - 10;
                     int boardY = newY / 32 - 1;
-                    if (newX < 320 || newX > 640 || board[boardX][boardY].fill != 0)
+                    if (newX < 320 || newX > 640 || board[boardY][boardX].fill != 0)
                         return true;
                     }
                 }
@@ -140,7 +154,9 @@ struct Tetromino {
                 if(shape[i][j] != 0) {
                     int newX = distance + x + j * BLOCKSIZE;
                     int newY = distance + y + i * BLOCKSIZE;
-                    if (newX < 320 || newX > 640)
+                    int boardX = newX / 32 - 10;
+                    int boardY = newY / 32;
+                    if (newX <= 320 || newX > 640 || board[boardY][boardX].fill != 0) 
                         return true;
                     }
                 }
@@ -151,9 +167,9 @@ struct Tetromino {
 
 
 const Grid3x3 L_Block = {{
+    {0, 0, 0, 0},
     {0, 1, 0, 0},
-    {0, 1, 0, 0},
-    {0, 1, 1, 0},
+    {0, 1, 1, 1},
     {0, 0, 0, 0}
 }};
 
@@ -166,35 +182,44 @@ const Grid3x3 Square_Block = {{
 
 const Grid3x3 T_Block = {{
     {0, 0, 0, 0},
-    {1, 1, 1, 0},
-    {0, 1, 0, 0},
+    {0, 1, 1, 1},
+    {0, 0, 1, 0},
     {0, 0, 0, 0}
 }};
 
 const Grid3x3 R_Block = {{
-    {0, 1, 1, 0},
-    {1, 1, 0, 0},
     {0, 0, 0, 0},
+    {0, 0, 1, 1},
+    {0, 1, 1, 0},
     {0, 0, 0, 0}
 }};
 
 const Grid3x3 Long_Block = {{
-    {1, 0, 0, 0},
-    {1, 0, 0, 0},
-    {1, 0, 0, 0},
-    {1, 0, 0, 0}
+    {0, 1, 0, 0},
+    {0, 1, 0, 0},
+    {0, 1, 0, 0},
+    {0, 1, 0, 0}
 }};
 
 const Grid3x3 Left_Block = {{
-    {1, 1, 0, 0},
-    {0, 1, 1, 0},
     {0, 0, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 1, 1},
+    {0, 0, 0, 0}
+}};
+
+const Grid3x3 RL_Block = {{
+    {0, 0, 0, 0},
+    {0, 0, 1, 0},
+    {1, 1, 1, 0},
     {0, 0, 0, 0}
 }};
 
 void drawTetromino(const Tetromino& tetromino, SDL_Renderer* renderer, SDL_Texture* blockTexture);
 
 void SpawnTetromino(Grid3x3 blockType, SDL_Texture* texture, int startX, int startY, int blockW, int blockH);
+
+void renderBoard(SDL_Renderer* renderer);
 
 
 

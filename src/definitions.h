@@ -7,6 +7,7 @@
 #define GRID_POS_H 672
 #define GRID_POS_X 320
 #define GRID_POS_Y 32
+#define SPAWN_X 448
 #define OFFSET_Y 16
 #define OFFSET_X 336
 #define BOARDWIDTH 10

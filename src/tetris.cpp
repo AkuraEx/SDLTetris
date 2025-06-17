@@ -18,6 +18,7 @@ static SDL_Texture *Square_texture = NULL;
 static SDL_Texture *R_texture = NULL;
 static SDL_Texture *Long_texture = NULL;
 static SDL_Texture *Left_texture = NULL;
+static SDL_Texture *RL_texture = NULL;
 static SDL_Texture *Grid_texture = NULL;
 
 
@@ -77,9 +78,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    // Load Square Block
-    surface = IMG_Load("./assets/Square_Tetromino.png");
 
+    // Load Square Block
+    surface = IMG_Load("./assets/Square_tetromino.png");
+    
     Square_texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_DestroySurface(surface);
 
@@ -132,6 +134,16 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         SDL_Log("Couldn't create texture: %s", SDL_GetError());
     }
 
+    // Load RL Block
+    surface = IMG_Load("./assets/RL_Tetromino.png");
+
+    RL_texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_DestroySurface(surface);
+
+    if (!RL_texture) {
+        SDL_Log("Couldn't create texture: %s", SDL_GetError());
+    }
+
     // Load Grid
     surface = IMG_Load("./assets/tetris_grid.png");
 
@@ -149,7 +161,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     grid_position.h = GRID_POS_H;
 
 
-    SpawnTetromino(L_Block, L_texture, GRID_POS_X - 16, GRID_POS_Y + 16, 32, 32);
+    SpawnTetromino(L_Block, L_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
 
     return SDL_APP_CONTINUE;
 }
@@ -177,7 +189,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                 block.x -= 32;
             } else if(keyboard_state[SDL_SCANCODE_RIGHT] && !block.checkWall(BLOCKSIZE) ){
                 block.x += 32;
-            } else if(keyboard_state[SDL_SCANCODE_DOWN]){
+            } else if(keyboard_state[SDL_SCANCODE_DOWN] && block.checkUnder()){
                 block.y += 32;
             } else if(keyboard_state[SDL_SCANCODE_SPACE]){
                 block.hardDrop();
@@ -197,18 +209,20 @@ void update() {
             curBlock ++;
             numBlocks ++;
 
-            if(current_tick % 6 == 0) {
-                SpawnTetromino(L_Block, L_texture, GRID_POS_X + 16 , GRID_POS_Y + 16, 32, 32);
-            } else if(current_tick % 6 == 1) {
-                SpawnTetromino(Square_Block, Square_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
-            } else if(current_tick % 6 == 2) {
-                SpawnTetromino(T_Block, T_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
-            } else if(current_tick % 6 == 3) {
-                SpawnTetromino(R_Block, R_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
-            } else if(current_tick % 6 == 4) {
-                SpawnTetromino(Left_Block, Left_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+            if(current_tick % 7 == 0) {
+                SpawnTetromino(L_Block, L_texture, SPAWN_X - 16 , GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 7 == 1) {
+                SpawnTetromino(Square_Block, Square_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 7 == 2) {
+                SpawnTetromino(T_Block, T_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 7 == 3) {
+                SpawnTetromino(R_Block, R_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 7 == 4) {
+                SpawnTetromino(Left_Block, Left_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
+            } else if(current_tick % 7 == 5) {
+                SpawnTetromino(Long_Block, Long_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
             } else {
-                SpawnTetromino(Long_Block, Long_texture, GRID_POS_X + 16, GRID_POS_Y + 16, 32, 32);
+                SpawnTetromino(RL_Block, RL_texture, SPAWN_X - 16, GRID_POS_Y + 16, 32, 32);
             }
 
 
@@ -237,21 +251,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderTexture(renderer, Grid_texture, NULL, &grid_position);
 
     // Render Blocks
-        drawTetromino(block, renderer, block.texture);
+    drawTetromino(block, renderer, block.texture);
 
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 10; j++) {
-            if(board[i][j].fill == 1) {
-                SDL_FRect temp;
-                temp.x = j * 32 + OFFSET_X;
-                temp.y = i * 32 + OFFSET_Y + 32;
-                temp.h = 32;
-                temp.w = 32;
-                SDL_RenderTexture(renderer, board[i][j].texture, NULL, &temp);
-            }
-        }
-    }
-
+    // Render Board
+    renderBoard(renderer);
 
     SDL_RenderPresent(renderer);
 
@@ -263,6 +266,11 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     SDL_DestroyTexture(L_texture);
     SDL_DestroyTexture(Square_texture);
+    SDL_DestroyTexture(Long_texture);
+    SDL_DestroyTexture(R_texture);
+    SDL_DestroyTexture(RL_texture);
+    SDL_DestroyTexture(T_texture);
+    SDL_DestroyTexture(Left_texture);
     SDL_DestroyTexture(Grid_texture);
     // SDL will handle window and renderer cleanup
 }
