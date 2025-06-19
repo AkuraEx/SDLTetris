@@ -5,6 +5,7 @@
 #include <string>
 #include "entity.h"
 #include "definitions.h"
+#include <random>
 #include <cstdlib>
 
 using namespace std;
@@ -36,8 +37,10 @@ float delta_time;
 // 2d Matrix
 // Collision
 
-
+Tetromino hold;
 Tetromino block;
+Tetromino next;
+bool holdUsed = false;
 int numBlocks = 1;
 int curBlock = 0;
 
@@ -193,6 +196,19 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                 block.y += 32;
             } else if(keyboard_state[SDL_SCANCODE_SPACE]){
                 block.hardDrop();
+            } else if(keyboard_state[SDL_SCANCODE_C] && holdUsed == false) {
+                if(hold.texture == NULL) {
+                    hold = block;
+                    SpawnTetromino(L_Block, L_texture, SPAWN_X - 16 , GRID_POS_Y + 16, 32, 32);
+                    holdUsed = true;
+                } else {
+                    Tetromino temp = block;
+                    block = hold;
+                    block.x = SPAWN_X - 16;
+                    block.y = GRID_POS_Y + 16;
+                    hold = temp;
+                    holdUsed = true;
+                }
             }
         }
 
@@ -206,6 +222,8 @@ void update() {
 
         if(!block.checkUnder()) {
             block.lock();
+            holdUsed = false;
+            clearLine();
             curBlock ++;
             numBlocks ++;
 
@@ -231,7 +249,7 @@ void update() {
         }
         last_tick = current_tick;
         if(interval > 250) {
-            interval -= 5;
+            interval -= 7;
         }
     }
 }

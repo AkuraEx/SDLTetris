@@ -64,6 +64,19 @@ struct Tetromino {
 
         if(!checkCollision(rotated)) {
             shape = rotated;
+        } else {
+            // Check if collision on both right and left and adjust accordingly
+            while(checkCollision(rotated)) {
+                if(!checkWall(-BLOCKSIZE)) {
+                    x -= 32;
+                    shape = rotated;
+                } else if(!checkWall(BLOCKSIZE)) {
+                    x += 32;
+                    shape = rotated;
+                } else {
+                    return;
+                }
+            }
         }
     }
 
@@ -221,6 +234,7 @@ void SpawnTetromino(Grid3x3 blockType, SDL_Texture* texture, int startX, int sta
 
 void renderBoard(SDL_Renderer* renderer);
 
+void clearLine();
 
 
 // TODO:

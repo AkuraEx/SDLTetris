@@ -40,3 +40,46 @@ void renderBoard(SDL_Renderer* renderer) {
         }
     }
 }
+
+void clearLine() {
+    bool change = false;
+    int cleared = 0;
+    int clearLine;
+    for (int i = BOARDHEIGHT - 1; i >= 0; i--) {
+        for (int j = 0; j < BOARDWIDTH; j++) {
+            if(board[i][j].fill == 0) {
+                break;
+            }
+            if(j == 9 && board[i][j].fill == 1) {
+                if(change == false) {
+                    clearLine = i;
+                }
+                change = true;
+                cleared++;
+
+              for(int x = 0; x <= 9; x++) {
+                  board[i][x].fill = 0;    
+                  board[i][x].texture = NULL;
+              }
+            }
+        }
+    }
+
+    if(change) {
+        for (int i = clearLine; i > 0; i--) {
+            for (int j = 0; j < BOARDWIDTH; j++) {
+                int k = 1;
+                int l = 0;
+                
+                while(l < cleared && i + k >= 0 && board[i + l][j].fill == 1 && board[i + k][j].fill == 0) {
+                    board[i + k][j] = board[i + l][j];
+                    board[i + l][j].fill = 0;
+                    board[i + l][j].texture = NULL;
+                    k ++;
+                    l ++;
+                }
+            }
+        }
+    }
+}
+
