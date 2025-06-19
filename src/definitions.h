@@ -7,6 +7,10 @@
 #define GRID_POS_H 672
 #define GRID_POS_X 320
 #define GRID_POS_Y 32
+#define NEXT_POS_W 192
+#define NEXT_POS_H 192
+#define NEXT_POS_X 736
+#define NEXT_POS_Y 32
 #define SPAWN_X 448
 #define OFFSET_Y 16
 #define OFFSET_X 336
