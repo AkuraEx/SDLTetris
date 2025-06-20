@@ -276,6 +276,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SpawnTetromino(block.shape, block.texture, SPAWN_X, GRID_POS_Y + 16, 32, 32);
     ghostBlock = block;
     ghostBlock.texture = getTransparentTexture(block.texture);
+    ghostBlock.hardDrop();
 
     return SDL_APP_CONTINUE;
 }
@@ -295,19 +296,25 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         if (key.repeat == 0) {
             if(keyboard_state[SDL_SCANCODE_UP] || keyboard_state[SDL_SCANCODE_Z] ) {
                 block.rotateClockwise();
-                ghostBlock.shape = block.shape;
+                ghostBlock = block;
+                ghostBlock.texture = getTransparentTexture(block.texture);
+                ghostBlock.hardDrop();
             } else if(keyboard_state[SDL_SCANCODE_X] ){
                 block.rotateCounterClockwise();
-                ghostBlock.shape = block.shape;
+                ghostBlock = block;
+                ghostBlock.texture = getTransparentTexture(block.texture);
+                ghostBlock.hardDrop();
             }
         }
         if(keyboard_state[SDL_SCANCODE_LEFT] && !block.checkWall(-BLOCKSIZE)){
                 block.x -= 32;
-                ghostBlock.x -= 32;
+                ghostBlock = block;
+                ghostBlock.texture = getTransparentTexture(block.texture);
                 ghostBlock.hardDrop();
             } else if(keyboard_state[SDL_SCANCODE_RIGHT] && !block.checkWall(BLOCKSIZE) ){
                 block.x += 32;
-                ghostBlock.x +=32;
+                ghostBlock = block;
+                ghostBlock.texture = getTransparentTexture(block.texture);
                 ghostBlock.hardDrop();
             } else if(keyboard_state[SDL_SCANCODE_DOWN] && block.checkUnder()){
                 block.y += 32;
@@ -323,6 +330,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     SpawnTetromino(block.shape, block.texture, SPAWN_X, GRID_POS_Y + 16, 32, 32);
                     ghostBlock = block;
                     ghostBlock.texture = getTransparentTexture(block.texture);
+                    ghostBlock.hardDrop();
                     holdUsed = true;
                 } else {
                     Tetromino temp = block;
@@ -333,6 +341,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     hold.shape = temp.shape;
                     ghostBlock = block;
                     ghostBlock.texture = getTransparentTexture(block.texture);
+                    ghostBlock.hardDrop();
                     holdUsed = true;
                 }
             }
