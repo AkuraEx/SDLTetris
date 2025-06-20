@@ -92,7 +92,7 @@ struct Tetromino {
                 int row = (newY - OFFSET_Y) / BLOCKSIZE;
                 int col = (newX - OFFSET_X) / BLOCKSIZE;
 
-                if (row >= BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row - 1][col].fill == 1) {
+                if (row > BOARDHEIGHT || col < 0 || col > BOARDWIDTH || board[row - 1][col].fill == 1) {
                     return false;
                 }
             }
@@ -153,7 +153,7 @@ struct Tetromino {
                     int newY = y + i * BLOCKSIZE;
                     int boardX = newX / 32 - 10;
                     int boardY = newY / 32 - 1;
-                    if (newX < 320 || newX > 640 || board[boardY][boardX].fill != 0)
+                    if (newX < 304 || newX > 608 || board[boardY][boardX].fill != 0)
                         return true;
                     }
                 }
@@ -169,7 +169,7 @@ struct Tetromino {
                     int newY = distance + y + i * BLOCKSIZE;
                     int boardX = newX / 32 - 10;
                     int boardY = newY / 32;
-                    if (newX <= 320 || newX > 640 || board[boardY][boardX].fill != 0) 
+                    if (newX <= 304 || newX > 608 || board[boardY][boardX].fill != 0) 
                         return true;
                     }
                 }
