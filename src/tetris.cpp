@@ -5,7 +5,6 @@
 #include <string>
 #include "entity.h"
 #include "definitions.h"
-#include <random>
 #include <cstdlib>
 
 using namespace std;
@@ -13,83 +12,27 @@ using namespace std;
 /* Global SDL objects */
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
-static SDL_Texture *L_texture = NULL;
-static SDL_Texture *T_texture = NULL;
-static SDL_Texture *Square_texture = NULL;
-static SDL_Texture *R_texture = NULL;
-static SDL_Texture *Long_texture = NULL;
-static SDL_Texture *Left_texture = NULL;
-static SDL_Texture *RL_texture = NULL;
-static SDL_Texture *L_textureA = NULL;
-static SDL_Texture *T_textureA = NULL;
-static SDL_Texture *Square_textureA = NULL;
-static SDL_Texture *R_textureA = NULL;
-static SDL_Texture *Long_textureA = NULL;
-static SDL_Texture *Left_textureA = NULL;
-static SDL_Texture *RL_textureA = NULL;
-static SDL_Texture *Grid_texture = NULL;
-static SDL_Texture *Next_texture = NULL;
-static SDL_Texture *Hold_texture = NULL;
 
-
-
-SDL_FRect grid_position;
-SDL_FRect next_position;
-SDL_FRect hold_position;
 
 Uint64 last_tick = 0;
 Uint64 current_tick = 0;
 Uint64 interval = 1000;
 float delta_time;
 
-
-
 Tetromino hold;
 Tetromino block;
 Tetromino nextBlock;
 Tetromino ghostBlock;
+
+SDL_FRect grid_position;
+SDL_FRect next_position;
+SDL_FRect hold_position;
+
 bool holdUsed = false;
 int numBlocks = 1;
 int curBlock = 0;
 
 Tile board[BOARDHEIGHT][BOARDWIDTH] = {0, NULL};
-
-void RandomTetromino(Tetromino& block) {
-    static std::mt19937 rng(static_cast<unsigned int>(time(nullptr)));
-    std::uniform_int_distribution<int> dist(0, 6);
-
-    int randomIndex = dist(rng);
-    switch (randomIndex) {
-        case 0:
-            block.shape = L_Block;
-            block.texture = L_texture;
-            break;
-        case 1:
-            block.shape = Square_Block;
-            block.texture = Square_texture;
-            break;
-        case 2:
-            block.shape = T_Block;
-            block.texture = T_texture;
-            break;
-        case 3:
-            block.shape = R_Block;
-            block.texture = R_texture;
-            break;
-        case 4:
-            block.shape = Left_Block;
-            block.texture = Left_texture;
-            break;
-        case 5:
-            block.shape = Long_Block;
-            block.texture = Long_texture;
-            break;
-        case 6:
-            block.shape = RL_Block;
-            block.texture = RL_texture;
-            break;
-    }
-}
 
 
 SDL_Texture* getTransparentTexture(SDL_Texture* tex) {
@@ -103,6 +46,22 @@ SDL_Texture* getTransparentTexture(SDL_Texture* tex) {
     return tex; // fallback (non-transparent)
 }
 
+void renderFullFrame() {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(renderer);
+
+    SDL_RenderTexture(renderer, Grid_texture, NULL, &grid_position);
+    SDL_RenderTexture(renderer, Next_texture, NULL, &next_position);
+    SDL_RenderTexture(renderer, Hold_texture, NULL, &hold_position);
+
+    drawTetromino(nextBlock, renderer, nextBlock.texture);
+    drawTetromino(block, renderer, block.texture);
+    drawTetromino(hold, renderer, hold.texture);
+    drawTetromino(ghostBlock, renderer, ghostBlock.texture);
+
+    renderBoard(renderer);
+    SDL_RenderPresent(renderer);
+}
 
 /* Runs once at startup */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -119,135 +78,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    surface = IMG_Load("./assets/L_Tetromino.png");
-    if (!surface) {
-        SDL_Log("Couldn't load image: %s", SDL_GetError());
+    if (!loadTextures(renderer)) {
+        SDL_Log("Failed to load textures");
         return SDL_APP_FAILURE;
     }
 
-
-
-    // Load L Block
-    L_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    L_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(L_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!L_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-
-    // Load Square Block
-    surface = IMG_Load("./assets/Square_tetromino.png");
     
-    Square_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    Square_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(Square_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!Square_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    // Load T Block
-    surface = IMG_Load("./assets/T_tetromino.png");
-    
-    T_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    T_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(T_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!T_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-    
-
-    // Load T Block
-    surface = IMG_Load("./assets/R_tetromino.png");
-    
-    R_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    R_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(R_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!R_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    // Load Left Block
-    surface = IMG_Load("./assets/Left_tetromino.png");
-
-    Left_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    Left_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(Left_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!Left_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    // Load Long Block
-    surface = IMG_Load("./assets/Long_Tetromino.png");
-
-    Long_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    Long_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(Long_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!Long_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-    }
-
-    // Load RL Block
-    surface = IMG_Load("./assets/RL_Tetromino.png");
-
-    RL_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    RL_textureA = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_SetTextureAlphaMod(RL_textureA, 100);
-    SDL_DestroySurface(surface);
-
-    if (!RL_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-    }
-
-    // Load Grid
-    surface = IMG_Load("./assets/tetris_grid.png");
-
-    Grid_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_DestroySurface(surface);
-    
-    if (!Grid_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    // Load Next
-    surface = IMG_Load("./assets/next.png");
-
-    Next_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_DestroySurface(surface);
-    
-    if (!Next_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    // Load Hold
-    surface = IMG_Load("./assets/hold.png");
-
-    Hold_texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_DestroySurface(surface);
-    
-    if (!Hold_texture) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
 
     grid_position.x = GRID_POS_X;
     grid_position.y = GRID_POS_Y;
@@ -267,8 +103,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     hold_position.w = NEXT_POS_W;
 
 
-    RandomTetromino(block);
-    RandomTetromino(nextBlock);
+    randomTetromino(block);
+    randomTetromino(nextBlock);
     nextBlock.x = NEXT_POS_X + 32;
     nextBlock.y = NEXT_POS_Y + 32;
     hold.x = HOLD_POS_X + 32;
@@ -326,7 +162,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     hold.texture = block.texture;
                     hold.shape = block.shape;
                     block = nextBlock;
-                    RandomTetromino(nextBlock);
+                    randomTetromino(nextBlock);
                     SpawnTetromino(block.shape, block.texture, SPAWN_X, GRID_POS_Y + 16, 32, 32);
                     ghostBlock = block;
                     ghostBlock.texture = getTransparentTexture(block.texture);
@@ -355,16 +191,17 @@ void update() {
 
     if(current_tick - last_tick >= interval) {
 
+
         if(!block.checkUnder()) {
             block.lock();
             holdUsed = false;
-            clearLine();
+            clearLine(White_texture, renderer);
             curBlock ++;
             numBlocks ++;
 
 
             block = nextBlock;
-            RandomTetromino(nextBlock);
+            randomTetromino(nextBlock);
             SpawnTetromino(block.shape, block.texture, SPAWN_X, GRID_POS_Y + 16, 32, 32);
             ghostBlock = block;
             ghostBlock.texture = getTransparentTexture(block.texture);
@@ -375,8 +212,8 @@ void update() {
             block.y += 32;
         }
         last_tick = current_tick;
-        if(interval > 250) {
-            interval -= 7;
+        if(interval > 200) {
+            interval -= 4;
         }
     }
 }
@@ -385,28 +222,7 @@ void update() {
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     update();
-
-
-    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-
-
-    // Render Grid
-    SDL_RenderTexture(renderer, Grid_texture, NULL, &grid_position);
-    SDL_RenderTexture(renderer, Next_texture, NULL, &next_position);
-    SDL_RenderTexture(renderer, Hold_texture, NULL, &hold_position);
-
-    // Render Blocks
-    drawTetromino(nextBlock, renderer, nextBlock.texture);
-    drawTetromino(block, renderer, block.texture);
-    drawTetromino(hold, renderer, hold.texture);
-    drawTetromino(ghostBlock, renderer, ghostBlock.texture);
-
-    // Render Board
-    renderBoard(renderer);
-
-    SDL_RenderPresent(renderer);
+    renderFullFrame();
 
     return SDL_APP_CONTINUE;
 }
@@ -414,15 +230,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 /* Runs once at shutdown */
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-    SDL_DestroyTexture(L_texture);
-    SDL_DestroyTexture(Square_texture);
-    SDL_DestroyTexture(Long_texture);
-    SDL_DestroyTexture(R_texture);
-    SDL_DestroyTexture(RL_texture);
-    SDL_DestroyTexture(T_texture);
-    SDL_DestroyTexture(Left_texture);
-    SDL_DestroyTexture(Grid_texture);
-    SDL_DestroyTexture(Next_texture);
-    SDL_DestroyTexture(Hold_texture);
+    destroyTextures();
     // SDL will handle window and renderer cleanup
 }

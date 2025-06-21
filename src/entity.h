@@ -2,8 +2,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <array>
-#include "definitions.h"
 #include <iostream>
+#include "texture.h"
+#include <random>
+#include "definitions.h"
 
 typedef struct {
     SDL_Texture *texture;
@@ -143,7 +145,6 @@ struct Tetromino {
             }
         }
     }
-    ////////////////////////////////////////////////
 
     bool checkCollision(Grid3x3& newShape) {
         for(int i = 0; i < TETROMINOGRID; ++i) {
@@ -234,9 +235,9 @@ void SpawnTetromino(Grid3x3 blockType, SDL_Texture* texture, int startX, int sta
 
 void renderBoard(SDL_Renderer* renderer);
 
-void clearLine();
+void clearLine(SDL_Texture* texture, SDL_Renderer* renderer);
 
+void renderFullFrame();
 
-// TODO:
-// Check Collision()
-// Lock Piece()
+void randomTetromino(Tetromino& block);
+

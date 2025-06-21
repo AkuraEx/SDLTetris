@@ -41,10 +41,11 @@ void renderBoard(SDL_Renderer* renderer) {
     }
 }
 
-void clearLine() {
+void clearLine(SDL_Texture* texture, SDL_Renderer* renderer) {
     bool change = false;
     int cleared = 0;
-    int clearLine;
+    int clearLine = 0;
+
     for (int i = BOARDHEIGHT - 1; i >= 0; i--) {
         for (int j = 0; j < BOARDWIDTH; j++) {
             if(board[i][j].fill == 0) {
@@ -57,15 +58,29 @@ void clearLine() {
                 change = true;
                 cleared++;
 
-              for(int x = 0; x <= 9; x++) {
-                  board[i][x].fill = 0;    
-                  board[i][x].texture = NULL;
-              }
             }
         }
     }
 
+    
+
+
     if(change) {
+        for (int i = clearLine; i > clearLine - cleared; i--) {
+            for(int j = 0; j < BOARDWIDTH; j++) {
+                board[i][j].texture = texture;
+            }
+        }
+
+        renderFullFrame();
+
+        for (int i = clearLine; i > clearLine - cleared; i--) {
+            for(int j = 0; j < BOARDWIDTH; j++) {
+                board[i][j].fill = 0;
+                board[i][j].texture = NULL;
+            }
+        }
+    
         for (int i = clearLine; i > 0; i--) {
             for (int j = 0; j < BOARDWIDTH; j++) {
                 int k = 1;
@@ -83,3 +98,40 @@ void clearLine() {
     }
 }
 
+
+void randomTetromino(Tetromino& block) {
+    static std::mt19937 rng(static_cast<unsigned int>(time(nullptr)));
+    std::uniform_int_distribution<int> dist(0, 6);
+
+    int randomIndex = dist(rng);
+    switch (randomIndex) {
+        case 0:
+            block.shape = L_Block;
+            block.texture = L_texture;
+            break;
+        case 1:
+            block.shape = Square_Block;
+            block.texture = Square_texture;
+            break;
+        case 2:
+            block.shape = T_Block;
+            block.texture = T_texture;
+            break;
+        case 3:
+            block.shape = R_Block;
+            block.texture = R_texture;
+            break;
+        case 4:
+            block.shape = Left_Block;
+            block.texture = Left_texture;
+            break;
+        case 5:
+            block.shape = Long_Block;
+            block.texture = Long_texture;
+            break;
+        case 6:
+            block.shape = RL_Block;
+            block.texture = RL_texture;
+            break;
+    }
+}
