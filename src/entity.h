@@ -235,7 +235,9 @@ void SpawnTetromino(Grid3x3 blockType, SDL_Texture* texture, int startX, int sta
 
 void renderBoard(SDL_Renderer* renderer);
 
-void clearLine(SDL_Texture* texture, SDL_Renderer* renderer);
+void clearLine(SDL_Texture* texture, bool& clear, int& cleared, int& Line);
+
+void removeLine(int& cleared, int& Line);
 
 void renderFullFrame();
 

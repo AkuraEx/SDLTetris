@@ -17,6 +17,8 @@ static SDL_Renderer *renderer = NULL;
 Uint64 last_tick = 0;
 Uint64 current_tick = 0;
 Uint64 interval = 1000;
+Uint64 intervalB = 1000;
+Uint64 tempInterval = 200;
 float delta_time;
 
 Tetromino hold;
@@ -29,8 +31,11 @@ SDL_FRect next_position;
 SDL_FRect hold_position;
 
 bool holdUsed = false;
+bool clear = false;
 int numBlocks = 1;
 int curBlock = 0;
+int cleared = 0;
+int Line = 0;
 
 Tile board[BOARDHEIGHT][BOARDWIDTH] = {0, NULL};
 
@@ -190,12 +195,16 @@ void update() {
     current_tick = SDL_GetTicks();
 
     if(current_tick - last_tick >= interval) {
+        interval = intervalB;
 
-
-        if(!block.checkUnder()) {
+        if(clear) {
+            removeLine(cleared, Line);
+            clear = false;
+        } else if(!block.checkUnder()) {
             block.lock();
             holdUsed = false;
-            clearLine(White_texture, renderer);
+
+            clearLine(White_texture, clear, cleared, Line);
             curBlock ++;
             numBlocks ++;
 
@@ -207,14 +216,18 @@ void update() {
             ghostBlock.texture = getTransparentTexture(block.texture);
             ghostBlock.hardDrop();
 
+            interval = tempInterval;
 
         } else {
             block.y += 32;
         }
+
         last_tick = current_tick;
         if(interval > 200) {
             interval -= 4;
+            intervalB -= 4;
         }
+
     }
 }
 

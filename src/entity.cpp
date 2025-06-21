@@ -41,10 +41,10 @@ void renderBoard(SDL_Renderer* renderer) {
     }
 }
 
-void clearLine(SDL_Texture* texture, SDL_Renderer* renderer) {
+void clearLine(SDL_Texture* texture, bool& clear, int& cleared, int& Line) {
     bool change = false;
-    int cleared = 0;
-    int clearLine = 0;
+    cleared = 0;
+    Line = 0;
 
     for (int i = BOARDHEIGHT - 1; i >= 0; i--) {
         for (int j = 0; j < BOARDWIDTH; j++) {
@@ -53,7 +53,7 @@ void clearLine(SDL_Texture* texture, SDL_Renderer* renderer) {
             }
             if(j == 9 && board[i][j].fill == 1) {
                 if(change == false) {
-                    clearLine = i;
+                    Line = i;
                 }
                 change = true;
                 cleared++;
@@ -62,26 +62,27 @@ void clearLine(SDL_Texture* texture, SDL_Renderer* renderer) {
         }
     }
 
-    
-
-
     if(change) {
-        for (int i = clearLine; i > clearLine - cleared; i--) {
+        clear = change;
+        for (int i = Line; i > Line - cleared; i--) {
             for(int j = 0; j < BOARDWIDTH; j++) {
                 board[i][j].texture = texture;
             }
         }
+    }
+}
 
-        renderFullFrame();
 
-        for (int i = clearLine; i > clearLine - cleared; i--) {
+void removeLine(int& cleared, int& Line) {
+
+        for (int i = Line; i > Line - cleared; i--) {
             for(int j = 0; j < BOARDWIDTH; j++) {
                 board[i][j].fill = 0;
                 board[i][j].texture = NULL;
             }
         }
     
-        for (int i = clearLine; i > 0; i--) {
+        for (int i = Line; i > 0; i--) {
             for (int j = 0; j < BOARDWIDTH; j++) {
                 int k = 1;
                 int l = 0;
@@ -92,7 +93,6 @@ void clearLine(SDL_Texture* texture, SDL_Renderer* renderer) {
                     board[i + l][j].texture = NULL;
                     k ++;
                     l ++;
-                }
             }
         }
     }
