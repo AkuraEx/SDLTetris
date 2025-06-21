@@ -26,6 +26,7 @@ Tetromino block;
 Tetromino nextBlock;
 Tetromino ghostBlock;
 
+SDL_FRect background_position;
 SDL_FRect grid_position;
 SDL_FRect next_position;
 SDL_FRect hold_position;
@@ -55,6 +56,7 @@ void renderFullFrame() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
+    SDL_RenderTexture(renderer, Background_texture, NULL, &background_position);
     SDL_RenderTexture(renderer, Grid_texture, NULL, &grid_position);
     SDL_RenderTexture(renderer, Next_texture, NULL, &next_position);
     SDL_RenderTexture(renderer, Hold_texture, NULL, &hold_position);
@@ -106,6 +108,13 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     hold_position.y = HOLD_POS_Y;
     hold_position.h = NEXT_POS_H;
     hold_position.w = NEXT_POS_W;
+
+    
+    background_position.x = 0;
+    background_position.y = 0;
+    background_position.h = WINDOW_HEIGHT;
+    background_position.w = WINDOW_WIDTH;
+    
 
 
     randomTetromino(block);

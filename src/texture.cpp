@@ -11,6 +11,7 @@ SDL_Texture *Grid_texture = nullptr;
 SDL_Texture *Next_texture = nullptr;
 SDL_Texture *Hold_texture = nullptr;
 SDL_Texture *White_texture = nullptr;
+SDL_Texture *Background_texture = nullptr;
 
 bool loadTextures(SDL_Renderer* renderer) {
         SDL_Surface *surface = NULL;
@@ -111,7 +112,7 @@ bool loadTextures(SDL_Renderer* renderer) {
         }
 
         // Load Grid
-        surface = IMG_Load("./assets/tetris_grid.png");
+        surface = IMG_Load("./assets/tetris_grid_B.png");
 
         Grid_texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_DestroySurface(surface);
@@ -122,7 +123,7 @@ bool loadTextures(SDL_Renderer* renderer) {
         }
 
         // Load Next
-        surface = IMG_Load("./assets/next.png");
+        surface = IMG_Load("./assets/next_B.png");
 
         Next_texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_DestroySurface(surface);
@@ -133,7 +134,7 @@ bool loadTextures(SDL_Renderer* renderer) {
         }
 
         // Load Hold
-        surface = IMG_Load("./assets/hold.png");
+        surface = IMG_Load("./assets/hold_B.png");
 
         Hold_texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_DestroySurface(surface);
@@ -150,6 +151,17 @@ bool loadTextures(SDL_Renderer* renderer) {
         SDL_DestroySurface(surface);
         
         if (!White_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        // Load Background
+        surface = IMG_Load("./assets/bad_background.png");
+
+        Background_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Background_texture) {
             SDL_Log("Couldn't create texture: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
@@ -175,4 +187,5 @@ void destroyTextures() {
     SDL_DestroyTexture(Grid_texture);
     SDL_DestroyTexture(Next_texture);
     SDL_DestroyTexture(Hold_texture);
+    SDL_DestroyTexture(Background_texture);
 }
