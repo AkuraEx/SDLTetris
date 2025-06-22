@@ -4,6 +4,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 #include "entity.h"
+#include "score.h"
 #include "definitions.h"
 #include <cstdlib>
 
@@ -30,6 +31,7 @@ SDL_FRect background_position;
 SDL_FRect grid_position;
 SDL_FRect next_position;
 SDL_FRect hold_position;
+SDL_FRect score_position;
 
 bool holdUsed = false;
 bool clear = false;
@@ -67,6 +69,8 @@ void renderFullFrame() {
     drawTetromino(ghostBlock, renderer, ghostBlock.texture);
 
     renderBoard(renderer);
+    SDL_RenderTexture(renderer, Score_texture, NULL, &score_position);
+    renderScore(renderer);
     SDL_RenderPresent(renderer);
 }
 
@@ -90,32 +94,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    
-
-    grid_position.x = GRID_POS_X;
-    grid_position.y = GRID_POS_Y;
-    grid_position.w = GRID_POS_W;
-    grid_position.h = GRID_POS_H;
-
-
-    next_position.x = NEXT_POS_X;
-    next_position.y = NEXT_POS_Y;
-    next_position.h = NEXT_POS_H;
-    next_position.w = NEXT_POS_W;
-
-
-    hold_position.x = HOLD_POS_X;
-    hold_position.y = HOLD_POS_Y;
-    hold_position.h = NEXT_POS_H;
-    hold_position.w = NEXT_POS_W;
-
-    
-    background_position.x = 0;
-    background_position.y = 0;
-    background_position.h = WINDOW_HEIGHT;
-    background_position.w = WINDOW_WIDTH;
-    
-
+    grid_position = {GRID_POS_X, GRID_POS_Y, GRID_POS_W, GRID_POS_H};
+    next_position = {NEXT_POS_X, NEXT_POS_Y, NEXT_POS_W, NEXT_POS_H};
+    hold_position = {HOLD_POS_X, HOLD_POS_Y, NEXT_POS_W, NEXT_POS_H};
+    background_position = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+    score_position = {SCORE_POS_X, SCORE_POS_Y, SCORE_POS_W, SCORE_POS_H};
 
     randomTetromino(block);
     randomTetromino(nextBlock);
@@ -207,8 +190,12 @@ void update() {
         interval = intervalB;
 
         if(clear) {
+            addScore(cleared);
+            cout << score << endl;
             removeLine(cleared, Line);
             clear = false;
+            ghostBlock.hardDrop();
+
         } else if(!block.checkUnder()) {
             block.lock();
             holdUsed = false;

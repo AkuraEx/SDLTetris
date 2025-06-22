@@ -1,5 +1,4 @@
 #pragma once
-#include "entity.h"
 
 #define WINDOW_WIDTH 960
 #define WINDOW_HEIGHT 768
@@ -13,6 +12,10 @@
 #define NEXT_POS_Y 32
 #define HOLD_POS_X 48
 #define HOLD_POS_Y 32
+#define SCORE_POS_X 720
+#define SCORE_POS_Y 392
+#define SCORE_POS_H 96
+#define SCORE_POS_W 255
 #define SPAWN_X 416
 #define OFFSET_Y 16
 #define OFFSET_X 320
@@ -21,4 +24,8 @@
 #define BLOCKSIZE 32
 #define TETROMINOSIZE 4
 #define TETROMINOGRID 4
+#define SINGLE 40
+#define DOUBLE 100
+#define TRIPLE 300
+#define TETRIS 1200
 

@@ -12,6 +12,8 @@ SDL_Texture *Next_texture = nullptr;
 SDL_Texture *Hold_texture = nullptr;
 SDL_Texture *White_texture = nullptr;
 SDL_Texture *Background_texture = nullptr;
+SDL_Texture *Numbers_texture = nullptr;
+SDL_Texture *Score_texture = nullptr;
 
 bool loadTextures(SDL_Renderer* renderer) {
         SDL_Surface *surface = NULL;
@@ -162,6 +164,28 @@ bool loadTextures(SDL_Renderer* renderer) {
         SDL_DestroySurface(surface);
         
         if (!Background_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        // Load Numbers
+        surface = IMG_Load("./assets/numbers.png");
+
+        Numbers_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Numbers_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        // Load Score
+        surface = IMG_Load("./assets/Score.png");
+
+        Score_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Score_texture) {
             SDL_Log("Couldn't create texture: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
