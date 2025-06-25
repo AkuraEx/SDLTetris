@@ -8,11 +8,11 @@
 #define GRID_POS_Y 32
 #define NEXT_POS_W 192
 #define NEXT_POS_H 192
-#define NEXT_POS_X 720
+#define NEXT_POS_X 680
 #define NEXT_POS_Y 32
-#define HOLD_POS_X 48
+#define HOLD_POS_X 88
 #define HOLD_POS_Y 32
-#define SCORE_POS_X 720
+#define SCORE_POS_X 680
 #define SCORE_POS_Y 392
 #define SCORE_POS_H 96
 #define SCORE_POS_W 255

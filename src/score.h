@@ -9,3 +9,4 @@ extern int score;
 
 void addScore(int cleared);
 void renderScore(SDL_Renderer* renderer);
+void renderLevel(SDL_Renderer* renderer, int level, int totalLines);

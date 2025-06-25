@@ -17,9 +17,9 @@ static SDL_Renderer *renderer = NULL;
 
 Uint64 last_tick = 0;
 Uint64 current_tick = 0;
-Uint64 interval = 1000;
-Uint64 intervalB = 1000;
-Uint64 tempInterval = 200;
+Uint64 interval = 400;
+Uint64 intervalB = 400;
+Uint64 tempInterval = 100;
 float delta_time;
 
 Tetromino hold;
@@ -35,10 +35,10 @@ SDL_FRect score_position;
 
 bool holdUsed = false;
 bool clear = false;
-int numBlocks = 1;
-int curBlock = 0;
 int cleared = 0;
 int Line = 0;
+int totalLines = 0;
+int level = 1;
 
 Tile board[BOARDHEIGHT][BOARDWIDTH] = {0, NULL};
 
@@ -71,6 +71,7 @@ void renderFullFrame() {
     renderBoard(renderer);
     SDL_RenderTexture(renderer, Score_texture, NULL, &score_position);
     renderScore(renderer);
+    renderLevel(renderer, level, totalLines);
     SDL_RenderPresent(renderer);
 }
 
@@ -191,8 +192,9 @@ void update() {
 
         if(clear) {
             addScore(cleared);
-            cout << score << endl;
             removeLine(cleared, Line);
+            totalLines += cleared;
+            level = ceil(totalLines / 10) + 1;
             clear = false;
             ghostBlock.hardDrop();
 
@@ -201,8 +203,6 @@ void update() {
             holdUsed = false;
 
             clearLine(White_texture, clear, cleared, Line);
-            curBlock ++;
-            numBlocks ++;
 
 
             block = nextBlock;
@@ -219,9 +219,9 @@ void update() {
         }
 
         last_tick = current_tick;
-        if(interval > 200) {
-            interval -= 4;
-            intervalB -= 4;
+        if(interval > 100) {
+            interval = 1000 - (level * 100);
+            intervalB -= interval;
         }
 
     }
