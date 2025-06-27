@@ -14,6 +14,8 @@ SDL_Texture *White_texture = nullptr;
 SDL_Texture *Background_texture = nullptr;
 SDL_Texture *Numbers_texture = nullptr;
 SDL_Texture *Score_texture = nullptr;
+SDL_Texture *Level_texture = nullptr;
+SDL_Texture *Lines_texture = nullptr;
 
 bool loadTextures(SDL_Renderer* renderer) {
         SDL_Surface *surface = NULL;
@@ -190,6 +192,28 @@ bool loadTextures(SDL_Renderer* renderer) {
             return SDL_APP_FAILURE;
         }
 
+        // Load Levels
+        surface = IMG_Load("./assets/Level.png");
+
+        Level_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Level_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        // Load Lines
+        surface = IMG_Load("./assets/Lines.png");
+
+        Lines_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Lines_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
         return true;
     }
 
@@ -212,4 +236,7 @@ void destroyTextures() {
     SDL_DestroyTexture(Next_texture);
     SDL_DestroyTexture(Hold_texture);
     SDL_DestroyTexture(Background_texture);
+    SDL_DestroyTexture(Score_texture);
+    SDL_DestroyTexture(Level_texture);
+    SDL_DestroyTexture(Lines_texture);
 }

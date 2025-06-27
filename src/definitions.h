@@ -13,7 +13,7 @@
 #define HOLD_POS_X 88
 #define HOLD_POS_Y 32
 #define SCORE_POS_X 680
-#define SCORE_POS_Y 392
+#define SCORE_POS_Y 352
 #define SCORE_POS_H 96
 #define SCORE_POS_W 255
 #define SPAWN_X 416

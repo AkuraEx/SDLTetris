@@ -17,8 +17,8 @@ static SDL_Renderer *renderer = NULL;
 
 Uint64 last_tick = 0;
 Uint64 current_tick = 0;
-Uint64 interval = 400;
-Uint64 intervalB = 400;
+Uint64 interval = 1000;
+Uint64 intervalB = 1000;
 Uint64 tempInterval = 100;
 float delta_time;
 
@@ -32,6 +32,8 @@ SDL_FRect grid_position;
 SDL_FRect next_position;
 SDL_FRect hold_position;
 SDL_FRect score_position;
+SDL_FRect level_position;
+SDL_FRect lines_position;
 
 bool holdUsed = false;
 bool clear = false;
@@ -70,6 +72,8 @@ void renderFullFrame() {
 
     renderBoard(renderer);
     SDL_RenderTexture(renderer, Score_texture, NULL, &score_position);
+    SDL_RenderTexture(renderer, Level_texture, NULL, &level_position);
+    SDL_RenderTexture(renderer, Lines_texture, NULL, &lines_position);
     renderScore(renderer);
     renderLevel(renderer, level, totalLines);
     SDL_RenderPresent(renderer);
@@ -100,6 +104,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     hold_position = {HOLD_POS_X, HOLD_POS_Y, NEXT_POS_W, NEXT_POS_H};
     background_position = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
     score_position = {SCORE_POS_X, SCORE_POS_Y, SCORE_POS_W, SCORE_POS_H};
+    level_position = {SCORE_POS_X, SCORE_POS_Y + 256, SCORE_POS_W, SCORE_POS_H};
+    lines_position = {SCORE_POS_X, SCORE_POS_Y + 128, SCORE_POS_W, SCORE_POS_H};
 
     randomTetromino(block);
     randomTetromino(nextBlock);
@@ -194,7 +200,7 @@ void update() {
             addScore(cleared);
             removeLine(cleared, Line);
             totalLines += cleared;
-            level = ceil(totalLines / 10) + 1;
+            level = ceil(totalLines / 5) + 1;
             clear = false;
             ghostBlock.hardDrop();
 
@@ -220,8 +226,8 @@ void update() {
 
         last_tick = current_tick;
         if(interval > 100) {
-            interval = 1000 - (level * 100);
-            intervalB -= interval;
+            interval = 600 - (level * level);
+            intervalB = interval;
         }
 
     }

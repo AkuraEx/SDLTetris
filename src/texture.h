@@ -16,6 +16,8 @@ extern SDL_Texture *White_texture;
 extern SDL_Texture *Background_texture;
 extern SDL_Texture *Numbers_texture;
 extern SDL_Texture *Score_texture;
+extern SDL_Texture *Level_texture;
+extern SDL_Texture *Lines_texture;
 
 bool loadTextures(SDL_Renderer* renderer);
 void destroyTextures();

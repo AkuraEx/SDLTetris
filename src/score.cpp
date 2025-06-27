@@ -26,7 +26,7 @@ void addScore(int cleared) {
 
 void renderScore(SDL_Renderer* renderer) {
     scoreString = std::to_string(score);
-    dstrect.y = 424;
+    dstrect.y = 384;
     for(int i = 0; i < scoreString.size(); i ++) {
         dstrect.x = NEXT_POS_X + (32 * i) + 32;
         srcrect.x = 32 * (scoreString[i] - '0');
@@ -37,13 +37,13 @@ void renderScore(SDL_Renderer* renderer) {
 void renderLevel(SDL_Renderer* renderer, int level, int totalLines) {
     linesString = std::to_string(totalLines);
     levelString = std::to_string(level);
-    dstrect.y = 700;
+    dstrect.y = 512;
     for(int i = 0; i < linesString.size(); i ++) {
         dstrect.x = NEXT_POS_X + (32 * i) + 32;
         srcrect.x = 32 * (linesString[i] - '0');
         SDL_RenderTexture(renderer, Numbers_texture, &srcrect, &dstrect); 
     }
-    dstrect.y = 732;
+    dstrect.y = 640;
     for(int i = 0; i < levelString.size(); i ++) {
         dstrect.x = NEXT_POS_X + (32 * i) + 32;
         srcrect.x = 32 * (levelString[i] - '0');
