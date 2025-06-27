@@ -20,6 +20,7 @@ extern SDL_Texture *Level_texture;
 extern SDL_Texture *Lines_texture;
 extern SDL_Texture *Logo_texture;
 extern SDL_Texture *Credits_texture;
+extern SDL_Texture *Game_over_texture;
 extern SDL_FRect background_position;
 extern SDL_FRect grid_position;
 extern SDL_FRect next_position;

@@ -19,6 +19,7 @@ SDL_Texture *Level_texture = nullptr;
 SDL_Texture *Lines_texture = nullptr;
 SDL_Texture *Logo_texture = nullptr;
 SDL_Texture *Credits_texture = nullptr;
+SDL_Texture *Game_over_texture = nullptr;
 
 SDL_FRect background_position;
 SDL_FRect grid_position;
@@ -260,6 +261,17 @@ bool loadTextures(SDL_Renderer* renderer) {
             return SDL_APP_FAILURE;
         }
 
+        // Load Game Over
+        surface = IMG_Load("./assets/game_over.png");
+
+        Game_over_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Game_over_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
         grid_position = {GRID_POS_X, GRID_POS_Y, GRID_POS_W, GRID_POS_H};
         next_position = {NEXT_POS_X, NEXT_POS_Y, NEXT_POS_W, NEXT_POS_H};
         hold_position = {HOLD_POS_X, HOLD_POS_Y, NEXT_POS_W, NEXT_POS_H};
@@ -297,4 +309,5 @@ void destroyTextures() {
     SDL_DestroyTexture(Lines_texture);
     SDL_DestroyTexture(Logo_texture);
     SDL_DestroyTexture(Credits_texture);
+    SDL_DestroyTexture(Game_over_texture);
 }

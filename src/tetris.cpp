@@ -32,6 +32,7 @@ bool holdUsed = false;
 bool clear = false;
 bool startMenu = true;
 bool isRunning = false;
+bool isOver = false;
 int cleared = 0;
 int Line = 0;
 int totalLines = 0;
@@ -67,14 +68,30 @@ void renderFullFrame() {
 void renderMenu() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
-
     SDL_RenderTexture(renderer, Background_texture, NULL, &background_position);
     SDL_RenderTexture(renderer, Logo_texture, NULL, &logo_position);
     SDL_RenderTexture(renderer, Credits_texture, NULL, &credits_position);
     SDL_RenderPresent(renderer);
 }
 
+void renderGameOver() {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(renderer);
+    SDL_RenderTexture(renderer, Background_texture, NULL, &background_position);
+    SDL_RenderTexture(renderer, Game_over_texture, NULL, &logo_position);
+    SDL_RenderPresent(renderer);
+}
+
 void gameInit() {
+    memset(board, {0}, sizeof(board));
+    hold = {};
+    cleared = 0;
+    Line = 0;
+    score = 0;
+    totalLines = 0;
+    level = 1;
+    interval = 1000;
+    intervalB = 1000;
     randomTetromino(block);
     randomTetromino(nextBlock);
     nextBlock.x = NEXT_POS_X + 32;
@@ -85,12 +102,6 @@ void gameInit() {
     ghostBlock = block;
     ghostBlock.texture = getTransparentTexture(block.texture);
     ghostBlock.hardDrop();
-    cleared = 0;
-    Line = 0;
-    totalLines = 0;
-    level = 1;
-    interval = 1000;
-    intervalB = 1000;
 }
 
 /* Runs once at startup */
@@ -131,7 +142,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             isRunning = true;
             gameInit();
         }
-    } else if(isRunning) {
+    }  else if(isRunning) {
         if (event->type == SDL_EVENT_KEY_DOWN) {
             SDL_KeyboardEvent key = event->key;
             if (key.repeat == 0) {
@@ -187,7 +198,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     }
                 }
             }
-    }
+        } else if (isOver) {
+            if (keyboard_state[SDL_SCANCODE_SPACE]) {
+                isOver = false;
+                isRunning = true;
+                gameInit();
+            }
+        }
     return SDL_APP_CONTINUE;
 }
 
@@ -211,10 +228,13 @@ void gameUpdate() {
 
             clearLine(White_texture, clear, cleared, Line);
 
-
             block = nextBlock;
             randomTetromino(nextBlock);
             SpawnTetromino(block.shape, block.texture, SPAWN_X, GRID_POS_Y + 16, 32, 32);
+            if(block.checkCollision(block.shape)) {
+                isOver = true;
+                isRunning = false;
+            }
             ghostBlock = block;
             ghostBlock.texture = getTransparentTexture(block.texture);
             ghostBlock.hardDrop();
@@ -242,6 +262,14 @@ void menuUpdate() {
     }
 }
 
+void overUpdate() {
+    current_tick = SDL_GetTicks();
+
+    if(current_tick - last_tick >= interval) {
+        last_tick = current_tick;
+    }
+}
+
 /* Runs once per frame to render */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
@@ -251,6 +279,9 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     } else if(isRunning) {
         gameUpdate();
         renderFullFrame();
+    } else if(isOver) {
+        overUpdate();
+        renderGameOver();
     }
 
     return SDL_APP_CONTINUE;
