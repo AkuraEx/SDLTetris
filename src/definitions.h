@@ -16,6 +16,14 @@
 #define SCORE_POS_Y 352
 #define SCORE_POS_H 96
 #define SCORE_POS_W 255
+#define LOGO_POS_X 256
+#define LOGO_POS_Y 96 
+#define LOGO_POS_W 480
+#define LOGO_POS_H 240
+#define CREDITS_POS_X 256
+#define CREDITS_POS_Y 288 
+#define CREDITS_POS_W 480
+#define CREDITS_POS_H 480
 #define SPAWN_X 416
 #define OFFSET_Y 16
 #define OFFSET_X 320

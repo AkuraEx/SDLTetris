@@ -18,6 +18,18 @@ extern SDL_Texture *Numbers_texture;
 extern SDL_Texture *Score_texture;
 extern SDL_Texture *Level_texture;
 extern SDL_Texture *Lines_texture;
+extern SDL_Texture *Logo_texture;
+extern SDL_Texture *Credits_texture;
+extern SDL_FRect background_position;
+extern SDL_FRect grid_position;
+extern SDL_FRect next_position;
+extern SDL_FRect hold_position;
+extern SDL_FRect score_position;
+extern SDL_FRect level_position;
+extern SDL_FRect lines_position;
+extern SDL_FRect logo_position;
+extern SDL_FRect credits_position;
 
+SDL_Texture* getTransparentTexture(SDL_Texture* tex);
 bool loadTextures(SDL_Renderer* renderer);
 void destroyTextures();

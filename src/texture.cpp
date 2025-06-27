@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "definitions.h"
 
 SDL_Texture *L_texture = nullptr, *L_textureA = nullptr;
 SDL_Texture *T_texture = nullptr, *T_textureA = nullptr;
@@ -16,6 +17,29 @@ SDL_Texture *Numbers_texture = nullptr;
 SDL_Texture *Score_texture = nullptr;
 SDL_Texture *Level_texture = nullptr;
 SDL_Texture *Lines_texture = nullptr;
+SDL_Texture *Logo_texture = nullptr;
+SDL_Texture *Credits_texture = nullptr;
+
+SDL_FRect background_position;
+SDL_FRect grid_position;
+SDL_FRect next_position;
+SDL_FRect hold_position;
+SDL_FRect score_position;
+SDL_FRect level_position;
+SDL_FRect lines_position;
+SDL_FRect logo_position;
+SDL_FRect credits_position;
+
+SDL_Texture* getTransparentTexture(SDL_Texture* tex) {
+    if (tex == L_texture) return L_textureA;
+    if (tex == T_texture) return T_textureA;
+    if (tex == Square_texture) return Square_textureA;
+    if (tex == R_texture) return R_textureA;
+    if (tex == Long_texture) return Long_textureA;
+    if (tex == Left_texture) return Left_textureA;
+    if (tex == RL_texture) return RL_textureA;
+    return tex; // fallback (non-transparent)
+}
 
 bool loadTextures(SDL_Renderer* renderer) {
         SDL_Surface *surface = NULL;
@@ -214,6 +238,38 @@ bool loadTextures(SDL_Renderer* renderer) {
             return SDL_APP_FAILURE;
         }
 
+        // Load Logo
+        surface = IMG_Load("./assets/Logo.png");
+
+        Logo_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Logo_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        // Load Credits
+        surface = IMG_Load("./assets/Credits.png");
+
+        Credits_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (!Credits_texture) {
+            SDL_Log("Couldn't create texture: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
+
+        grid_position = {GRID_POS_X, GRID_POS_Y, GRID_POS_W, GRID_POS_H};
+        next_position = {NEXT_POS_X, NEXT_POS_Y, NEXT_POS_W, NEXT_POS_H};
+        hold_position = {HOLD_POS_X, HOLD_POS_Y, NEXT_POS_W, NEXT_POS_H};
+        background_position = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        score_position = {SCORE_POS_X, SCORE_POS_Y, SCORE_POS_W, SCORE_POS_H};
+        level_position = {SCORE_POS_X, SCORE_POS_Y + 256, SCORE_POS_W, SCORE_POS_H};
+        lines_position = {SCORE_POS_X, SCORE_POS_Y + 128, SCORE_POS_W, SCORE_POS_H};
+        logo_position = {LOGO_POS_X, LOGO_POS_Y, LOGO_POS_W, LOGO_POS_H};
+        credits_position = {CREDITS_POS_X, CREDITS_POS_Y, CREDITS_POS_W, CREDITS_POS_H};
+
         return true;
     }
 
@@ -239,4 +295,6 @@ void destroyTextures() {
     SDL_DestroyTexture(Score_texture);
     SDL_DestroyTexture(Level_texture);
     SDL_DestroyTexture(Lines_texture);
+    SDL_DestroyTexture(Logo_texture);
+    SDL_DestroyTexture(Credits_texture);
 }
