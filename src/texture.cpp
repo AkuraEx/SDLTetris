@@ -262,7 +262,7 @@ bool loadTextures(SDL_Renderer* renderer) {
         }
 
         // Load Game Over
-        surface = IMG_Load("./assets/game_over.png");
+        surface = IMG_Load("./assets/Game_Over2.png");
 
         Game_over_texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_DestroySurface(surface);

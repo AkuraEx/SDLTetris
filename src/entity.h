@@ -7,19 +7,20 @@
 #include <random>
 #include "definitions.h"
 
+// Unique structure for board information
 typedef struct {
     SDL_Texture *texture;
     int fill;
 } Tile;
 
+// Each piece uses a grid for matrix transformations
 using Grid3x3 = std::array<std::array<int, TETROMINOGRID>, TETROMINOGRID>;
 extern Tile board[BOARDHEIGHT][BOARDWIDTH];
 
-
-
+// Player actions and collision logic for each block
 struct Tetromino {
     Grid3x3 shape;
-    int x, y; // Position in pixels
+    int x, y;
     SDL_Texture *texture;
 
     Tetromino() : x(0), y(0) {

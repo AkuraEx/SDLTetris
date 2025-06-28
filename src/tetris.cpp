@@ -42,7 +42,6 @@ int level = 1;
 Tile board[BOARDHEIGHT][BOARDWIDTH] = {0, NULL};
 
 
-
 void renderFullFrame() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
@@ -82,11 +81,12 @@ void renderGameOver() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
     SDL_RenderTexture(renderer, Background_texture, NULL, &background_position);
-    SDL_RenderTexture(renderer, Game_over_texture, NULL, &logo_position);
+    SDL_RenderTexture(renderer, Game_over_texture, NULL, &background_position);
     SDL_RenderPresent(renderer);
 }
 
 void gameInit() {
+    // Board clear for repeat playthroughs
     memset(board, {0}, sizeof(board));
     memset(menuBlock, {0}, sizeof(menuBlock));
     hold = {};
@@ -109,6 +109,7 @@ void gameInit() {
     ghostBlock.hardDrop();
 }
 
+// Random coords for the blocks on the main screen to spawn in
 void randomCords(Tetromino& block) {
     static std::mt19937 rng(static_cast<unsigned int>(time(nullptr)));
     std::uniform_int_distribution<int> dist(0, 24);
@@ -141,6 +142,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    // All textures loaded in texture.cpp
     if (!loadTextures(renderer)) {
         SDL_Log("Failed to load textures");
         return SDL_APP_FAILURE;
@@ -160,12 +162,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         return SDL_APP_SUCCESS;
     }
 
+    // Start menu loop
     if(startMenu) {
         if (keyboard_state[SDL_SCANCODE_SPACE]) {
             startMenu = false;
             isRunning = true;
             gameInit();
         }
+    // Game loop
     }  else if(isRunning) {
         if (event->type == SDL_EVENT_KEY_DOWN) {
             SDL_KeyboardEvent key = event->key;
@@ -222,8 +226,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     }
                 }
             }
+        // Game over loop
         } else if (isOver) {
-            if (keyboard_state[SDL_SCANCODE_SPACE]) {
+            if (keyboard_state[SDL_SCANCODE_R]) {
                 isOver = false;
                 isRunning = true;
                 gameInit();
@@ -232,6 +237,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     return SDL_APP_CONTINUE;
 }
 
+// Updates (interval)ms and checks if lines need to be cleared
 void gameUpdate() {
     current_tick = SDL_GetTicks();
 
@@ -278,6 +284,7 @@ void gameUpdate() {
     }
 }
 
+// Updates the falling blocks on the main menu
 void menuUpdate() {
     current_tick = SDL_GetTicks();
 
@@ -308,6 +315,7 @@ void overUpdate() {
     }
 }
 
+
 /* Runs once per frame to render */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
@@ -329,5 +337,4 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     destroyTextures();
-    // SDL will handle window and renderer cleanup
 }
