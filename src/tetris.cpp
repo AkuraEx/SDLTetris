@@ -17,6 +17,7 @@ static SDL_Renderer *renderer = NULL;
 
 Uint64 last_tick = 0;
 Uint64 current_tick = 0;
+Uint64 menuInterval = 25;
 Uint64 interval = 1000;
 Uint64 intervalB = 1000;
 Uint64 tempInterval = 100;
@@ -26,7 +27,7 @@ Tetromino hold;
 Tetromino block;
 Tetromino nextBlock;
 Tetromino ghostBlock;
-
+Tetromino menuBlock[15];
 
 bool holdUsed = false;
 bool clear = false;
@@ -69,6 +70,9 @@ void renderMenu() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
     SDL_RenderTexture(renderer, Background_texture, NULL, &background_position);
+    for(int i = 0; i < 15; i ++) {
+        drawTetromino(menuBlock[i], renderer, menuBlock[i].texture);
+    }
     SDL_RenderTexture(renderer, Logo_texture, NULL, &logo_position);
     SDL_RenderTexture(renderer, Credits_texture, NULL, &credits_position);
     SDL_RenderPresent(renderer);
@@ -84,6 +88,7 @@ void renderGameOver() {
 
 void gameInit() {
     memset(board, {0}, sizeof(board));
+    memset(menuBlock, {0}, sizeof(menuBlock));
     hold = {};
     cleared = 0;
     Line = 0;
@@ -104,6 +109,23 @@ void gameInit() {
     ghostBlock.hardDrop();
 }
 
+void randomCords(Tetromino& block) {
+    static std::mt19937 rng(static_cast<unsigned int>(time(nullptr)));
+    std::uniform_int_distribution<int> dist(0, 24);
+    int randomIndexx = dist(rng);
+    int randomIndexy = dist(rng);
+    block.x = randomIndexx * BLOCKSIZE;
+    block.y = randomIndexy * - BLOCKSIZE;
+}
+
+void menuInit() {
+    for(int i = 0; i < 15; i ++) {
+        randomTetromino(menuBlock[i]);
+        randomCords(menuBlock[i]);
+    }
+}
+
+
 /* Runs once at startup */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -123,6 +145,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         SDL_Log("Failed to load textures");
         return SDL_APP_FAILURE;
     }
+
+    menuInit();
     return SDL_APP_CONTINUE;
 }
 
@@ -257,8 +281,22 @@ void gameUpdate() {
 void menuUpdate() {
     current_tick = SDL_GetTicks();
 
-    if(current_tick - last_tick >= interval) {
+    if(current_tick - last_tick >= menuInterval) {
         last_tick = current_tick;
+        for(int i = 0; i < 15; i ++) {
+            if(i % 2 == 0) {
+                menuBlock[i].y +=4;
+            } else {
+            menuBlock[i].y += 8;
+            }
+            if(menuBlock[i].y % 256 == 0) {
+                menuBlock[i].menuRotateClockwise();
+            }
+            if(menuBlock[i].y > WINDOW_HEIGHT) {
+                randomTetromino(menuBlock[i]);
+                randomCords(menuBlock[i]);
+            }
+        }
     }
 }
 

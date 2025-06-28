@@ -82,6 +82,18 @@ struct Tetromino {
         }
     }
 
+    void menuRotateClockwise() {
+        Grid3x3 rotated{};
+        for (int i = 0; i < TETROMINOGRID; ++i) {
+            for (int j = 0; j < TETROMINOGRID; ++j) {
+                rotated[j][TETROMINOGRID - 1 - i] = shape[i][j];
+
+            }
+        }
+
+        shape = rotated;
+    }
+
 
     bool checkUnder() {
         for (int i = 0; i < TETROMINOGRID; ++i) {
