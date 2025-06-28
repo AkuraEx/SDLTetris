@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "array": "cpp"
+    },
+    "makefile.configureOnOpen": false
+}
