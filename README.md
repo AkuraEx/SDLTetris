@@ -2,9 +2,6 @@
 
 ![Start Screen](http://github.com/AkuraEx/SDLTetris/blob/main/assets/screenshot1.png?raw=true)
 
-## How To Play:
-On a Windows machine just type out/tetris.exe in the main directory
-
 ## Controls:
 * Left and Right to move
 * Up/Z to rotate clockwise
